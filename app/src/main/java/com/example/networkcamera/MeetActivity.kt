@@ -22,6 +22,7 @@ import java.util.*
 
 class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
     private var cameraId: String = ""
+    private var isWatch: Boolean = true
 
     private var view: JitsiMeetView? = null
 
@@ -41,13 +42,10 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
     }
 
     override fun onBackPressed() {
-        DialogManager.instance.showMessage(this, "離開後將關閉攝影機", true)?.let {
-            it.setOnClickListener {
-                DialogManager.instance.dismissDialog()
-                DialogManager.instance.showLoading(this)
-                APIManager.instance.doCameraDelete(CameraDeleteReq(cameraId))
-            }
-        }
+        if (isWatch)
+            JitsiMeetActivityDelegate.onBackPressed()
+        else
+            showLeaveDialog()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +57,7 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
             view = JitsiMeetView(this)
 
             cameraId = it.getString("id") ?: return@let
-            val isWatch = it.getBoolean("isWatch")
+            isWatch = it.getBoolean("isWatch")
 
             val options = JitsiMeetConferenceOptions.Builder()
                 .setServerURL(URL("https://meet.jit.si"))
@@ -151,6 +149,16 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
                     if (arg.status == 0)
                         JitsiMeetActivityDelegate.onBackPressed()
                 }
+            }
+        }
+    }
+
+    private fun showLeaveDialog() {
+        DialogManager.instance.showMessage(this, "離開後將關閉攝影機", true)?.let {
+            it.setOnClickListener {
+                DialogManager.instance.dismissDialog()
+                DialogManager.instance.showLoading(this)
+                APIManager.instance.doCameraDelete(CameraDeleteReq(cameraId))
             }
         }
     }
