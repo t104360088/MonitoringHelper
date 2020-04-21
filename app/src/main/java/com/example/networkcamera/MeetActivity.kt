@@ -12,13 +12,16 @@ import org.jitsi.meet.sdk.R
 import java.net.URL
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.networkcamera.dataType.CameraDeleteReq
+import com.example.networkcamera.dataType.CameraDeleteRes
 import com.facebook.react.ReactRootView
 import com.facebook.react.views.view.ReactViewGroup
 import kotlinx.android.synthetic.main.activity_meet.*
+import java.util.*
 
 
-class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface {
-    private lateinit var roomID: String
+class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
+    private var cameraId: String = ""
 
     private var view: JitsiMeetView? = null
 
@@ -38,21 +41,29 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface {
     }
 
     override fun onBackPressed() {
-        JitsiMeetActivityDelegate.onBackPressed()
+        DialogManager.instance.showMessage(this, "離開後將關閉攝影機", true)?.let {
+            it.setOnClickListener {
+                DialogManager.instance.dismissDialog()
+                DialogManager.instance.showLoading(this)
+                APIManager.instance.doCameraDelete(CameraDeleteReq(cameraId))
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.networkcamera.R.layout.activity_meet)
+        APIManager.instance.addObserver(this)
 
         intent?.extras?.let {
             view = JitsiMeetView(this)
 
+            cameraId = it.getString("id") ?: return@let
             val isWatch = it.getBoolean("isWatch")
 
             val options = JitsiMeetConferenceOptions.Builder()
                 .setServerURL(URL("https://meet.jit.si"))
-                .setRoom("mmslab40640686319")
+                .setRoom("mmslab406mmslab406${cameraId}")
                 .setSubject("居家監控")
                 .setVideoMuted(isWatch)
                 .setAudioMuted(isWatch)
@@ -122,13 +133,25 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface {
 
     override fun onResume() {
         super.onResume()
-
+        APIManager.instance.addObserver(this)
         JitsiMeetActivityDelegate.onHostResume(this)
     }
 
     override fun onStop() {
         super.onStop()
-
+        APIManager.instance.deleteObserver(this)
         JitsiMeetActivityDelegate.onHostPause(this)
+    }
+
+    override fun update(o: Observable?, arg: Any?) {
+        when(arg) {
+            is CameraDeleteRes -> {
+                runOnUiThread {
+                    DialogManager.instance.cancelLoading()
+                    if (arg.status == 0)
+                        JitsiMeetActivityDelegate.onBackPressed()
+                }
+            }
+        }
     }
 }
