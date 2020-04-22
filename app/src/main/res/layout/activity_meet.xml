@@ -23,10 +23,11 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_panel"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="160dp"
         android:visibility="gone"
-        android:background="@android:color/white"
+        android:background="@color/black_normal"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button

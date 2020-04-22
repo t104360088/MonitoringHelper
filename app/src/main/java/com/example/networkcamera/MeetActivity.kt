@@ -81,6 +81,7 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
                     Log.e("onConferenceJoined", p0.toString())
 
                     tv_hint.visibility = View.GONE
+                    cl_panel.visibility = if (isWatch) View.VISIBLE else View.GONE
                     react_view.addView(view)
                 }
 
@@ -147,7 +148,7 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
                 runOnUiThread {
                     DialogManager.instance.cancelLoading()
                     if (arg.status == 0)
-                        JitsiMeetActivityDelegate.onBackPressed()
+                        view?.leave()
                 }
             }
         }

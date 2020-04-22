@@ -23,11 +23,11 @@ class MainActivity : AppCompatActivity(), Observer {
         setContentView(R.layout.activity_main)
         APIManager.instance.addObserver(this)
 
-        tv_set.setOnClickListener {
+        img_camera_set.setOnClickListener {
             showCameraSetDialog()
         }
 
-        tv_watch.setOnClickListener {
+        img_camera_watch.setOnClickListener {
             DialogManager.instance.showLoading(this)
             APIManager.instance.doCameraList()
         }
