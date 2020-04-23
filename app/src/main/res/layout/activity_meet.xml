@@ -25,19 +25,35 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_panel"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="170dp"
         android:visibility="gone"
         android:background="@color/black_normal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <Button
-            android:id="@+id/btn_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="關閉"
+        <ImageView
+            android:id="@+id/img_volume"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:src="@drawable/volume"
+            android:padding="18dp"
+            android:background="@drawable/circle_white"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/img_close"/>
+
+        <ImageView
+            android:id="@+id/img_close"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:src="@drawable/hang_up"
+            android:padding="18dp"
+            android:background="@drawable/circle_red"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/img_volume"
             app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

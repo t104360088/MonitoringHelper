@@ -1,6 +1,8 @@
 package com.example.networkcamera
 
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -8,7 +10,6 @@ import androidx.core.view.get
 import androidx.fragment.app.FragmentActivity
 import com.facebook.react.modules.core.PermissionListener
 import org.jitsi.meet.sdk.*
-import org.jitsi.meet.sdk.R
 import java.net.URL
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -50,7 +51,7 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.example.networkcamera.R.layout.activity_meet)
+        setContentView(R.layout.activity_meet)
         APIManager.instance.addObserver(this)
 
         intent?.extras?.let {
@@ -59,10 +60,11 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
             cameraId = it.getString("id") ?: return@let
             isWatch = it.getBoolean("isWatch")
 
+            val room = it.getString("room") ?: ""
             val options = JitsiMeetConferenceOptions.Builder()
                 .setServerURL(URL("https://meet.jit.si"))
                 .setRoom("mmslab406mmslab406${cameraId}")
-                .setSubject("居家監控")
+                .setSubject(room)
                 .setVideoMuted(isWatch)
                 .setAudioMuted(isWatch)
                 .setFeatureFlag("chat.enabled", false)
@@ -83,6 +85,7 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
                     tv_hint.visibility = View.GONE
                     cl_panel.visibility = if (isWatch) View.VISIBLE else View.GONE
                     react_view.addView(view)
+                    setListen()
                 }
 
                 override fun onConferenceWillJoin(p0: MutableMap<String, Any>?) {
@@ -99,10 +102,6 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
 //            }
 
             tv_hint.text = if (isWatch) "正在連線到攝影機..." else "正在設定攝影機..."
-
-            btn_close.setOnClickListener {
-                view?.leave()
-            }
         }
     }
 
@@ -162,5 +161,31 @@ class MeetActivity : FragmentActivity(), JitsiMeetActivityInterface, Observer {
                 APIManager.instance.doCameraDelete(CameraDeleteReq(cameraId))
             }
         }
+    }
+
+    private fun setListen() {
+        img_volume.isActivated = true
+
+        img_volume.setOnClickListener {
+            it.isActivated = !it.isActivated
+            setSpeaker(it.isActivated)
+
+            val res = if (it.isActivated) R.drawable.volume else R.drawable.mute
+            img_volume.setImageResource(res)
+        }
+
+        img_close.setOnClickListener {
+            view?.leave()
+        }
+    }
+
+    private fun setSpeaker(isOn: Boolean) {
+        val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        am.isSpeakerphoneOn = isOn
+
+        val volume = if (isOn) am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL) else 0
+        am.setStreamVolume(AudioManager.STREAM_VOICE_CALL, volume, 0)
+
+        Log.e("volume", "isSpeaker: ${am.isSpeakerphoneOn}, volume: $volume")
     }
 }

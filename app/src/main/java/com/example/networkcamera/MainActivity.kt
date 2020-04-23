@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity(), Observer {
                     DialogManager.instance.cancelLoading()
                     if (arg.status == 0) {
                         val b = Bundle()
+                        b.putString("room", arg.result.name)
                         b.putString("id", arg.result.id)
                         b.putBoolean("isWatch", false)
                         startActivity(Intent(this, MeetActivity::class.java).putExtras(b))
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity(), Observer {
                     DialogManager.instance.dismissDialog()
 
                     val b = Bundle()
+                    b.putString("room", list[position].name)
                     b.putString("id", list[position].id)
                     b.putBoolean("isWatch", true)
                     startActivity(Intent(this, MeetActivity::class.java).putExtras(b))
